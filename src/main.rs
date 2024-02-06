@@ -56,8 +56,9 @@ fn main() {
     let mut y_offset = (WINDOW_HEIGHT / 2) as i32;
 
     // TODO: move to config
-    let mut frame_dur_acc: Duration;
     let frame_duration = Duration::from_secs_f64(MS_PER_FRAME / 1000.0);
+
+    let mut frame_dur_acc: Duration;
     let mut elapsed = Duration::from_secs(0);
     let mut credits = Duration::from_secs(0);
 
