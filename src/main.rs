@@ -1,7 +1,5 @@
-
 extern crate sdl2;
 
-use std::f64::consts::PI;
 use std::time::{Duration, Instant};
 
 use sdl2::event::Event;
@@ -9,14 +7,13 @@ use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::Rect;
 
 mod config;
 pub use crate::config::video::*;
 
 mod entities;
 use crate::entities::triangle::*;
-
 
 fn main() {
     // rust/SDL playground
@@ -37,22 +34,14 @@ fn main() {
 
     // Sample texture
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.load_texture(
-        "assets/image/wooden_floor_seamless.png"
-    ).unwrap();
+    let texture = texture_creator
+        .load_texture("assets/image/wooden_floor_seamless.png")
+        .unwrap();
     let query = texture.query();
-    let (texture_width , texture_height) = (
-        query.width,
-        query.height
-    );
+    let (texture_width, texture_height) = (query.width, query.height);
 
     // Texture "target" (None would mean: stretch to fill the canvas)
-    let destination = Rect::new(
-        10,
-        10,
-        texture_width,
-        texture_height,
-    );
+    let destination = Rect::new(10, 10, texture_width, texture_height);
 
     #[cfg(debug_assertions)]
     println!("dest {destination:?}");
@@ -81,7 +70,6 @@ fn main() {
     let mut triangle = Triangle::new(x_offset, y_offset);
 
     'running: loop {
-
         // Update clock and frame duration
         let curr_clk = Instant::now();
         frame_dur_acc = curr_clk - last_clk;
@@ -90,15 +78,20 @@ fn main() {
         // Handle input
         for event in event_pump.poll_iter() {
             match event {
-                Event::Quit { .. } |
-                Event::KeyDown { keycode: Some(Keycode::Q), .. } |
-                Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Q),
+                    ..
+                }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => {
                     break 'running;
                 }
                 Event::MouseMotion { x, y, .. } => {
                     x_offset = x;
                     y_offset = y;
-
                 }
                 _ => {}
             }
@@ -117,12 +110,7 @@ fn main() {
         while credits >= sim_cost {
             credits -= sim_cost;
 
-            triangle.update(
-                sim_cost,
-                x_offset,
-                y_offset,
-                &mut acc,
-            );
+            triangle.update(sim_cost, x_offset, y_offset, &mut acc);
 
             elapsed += sim_cost;
         }
@@ -130,21 +118,17 @@ fn main() {
         // Adding mouse coords as offsets so our triangle is drawn at the cursor
         // Transposed to conform to filled_polygon() (and possibly others).
         let (vx, vy) = (
-            [triangle.point.0.x as i16, triangle.point.1.x as i16, triangle.point.2.x as i16],
-            [triangle.point.0.y as i16, triangle.point.1.y as i16, triangle.point.2.y as i16],
+            [
+                triangle.point.0.x as i16,
+                triangle.point.1.x as i16,
+                triangle.point.2.x as i16,
+            ],
+            [
+                triangle.point.0.y as i16,
+                triangle.point.1.y as i16,
+                triangle.point.2.y as i16,
+            ],
         );
-
-        /*
-        #[cfg(debug_assertions)]
-        println!("color: ({0:?}, {1:?}, {2:?}), acc(r,g,b)=({3:?}, {4:?}, {5:?})",
-            triangle.color.0,
-            triangle.color.1,
-            triangle.color.2,
-            (Triangle::CIRC_THIRDS.0 + acc.as_secs_f64()),
-            (Triangle::CIRC_THIRDS.1 + acc.as_secs_f64()),
-            (Triangle::CIRC_THIRDS.2 + acc.as_secs_f64()),
-        );
-        */
 
         canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
         canvas.clear();
@@ -153,15 +137,13 @@ fn main() {
         canvas.copy(&texture, None, Some(destination)).unwrap();
 
         // Triangle
-        canvas.filled_polygon(
-            &vx,
-            &vy,
-            Color::RGB(
-                triangle.color.0,
-                triangle.color.1,
-                triangle.color.2,
-            ),
-        ).unwrap_or_else(|err| println!("{:?}", err));
+        canvas
+            .filled_polygon(
+                &vx,
+                &vy,
+                Color::RGB(triangle.color.0, triangle.color.1, triangle.color.2),
+            )
+            .unwrap_or_else(|err| println!("{:?}", err));
 
         canvas.present();
     }

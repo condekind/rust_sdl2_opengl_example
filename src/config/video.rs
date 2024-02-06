@@ -1,4 +1,3 @@
-
 use std::f64::consts::PI;
 
 pub const WINDOW_WIDTH: u32 = 640;
