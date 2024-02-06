@@ -11,17 +11,11 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::{Point, Rect};
 
-// TODO: move to config
-
 mod config;
 pub use crate::config::video::*;
 
 mod entities;
-mod traits;
-
 use crate::entities::triangle::*;
-
-//
 
 
 fn main() {
@@ -43,9 +37,14 @@ fn main() {
 
     // Sample texture
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.load_texture("assets/image/wooden_floor_seamless.png").unwrap();
+    let texture = texture_creator.load_texture(
+        "assets/image/wooden_floor_seamless.png"
+    ).unwrap();
     let query = texture.query();
-    let (texture_width , texture_height) = (query.width, query.height);
+    let (texture_width , texture_height) = (
+        query.width,
+        query.height
+    );
 
     // Texture "target" (None would mean: stretch to fill the canvas)
     let destination = Rect::new(
@@ -59,13 +58,9 @@ fn main() {
     println!("dest {destination:?}");
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    // Accumulators for R, G, B start with a (2*PI/3.0) rad gap from each other
-    let mut acc = (
-        Duration::from_secs((0.0 * THIRD_OF_CIRCUMFERENCE) as u64),
-        Duration::from_secs((1.0 * THIRD_OF_CIRCUMFERENCE) as u64),
-        Duration::from_secs((2.0 * THIRD_OF_CIRCUMFERENCE) as u64),
-    );
-    let mut acc_ = Duration::from_secs(THIRD_OF_CIRCUMFERENCE as u64);
+    // Accumulator for R, G, B
+    // When used, must be added to 0/1/2 times a (2*PI/3.0) rad gap
+    let mut acc = Duration::from_secs(THIRD_OF_CIRCUMFERENCE as u64);
 
     // Mid canvas as both x and y offset
     let mut x_offset = (WINDOW_WIDTH / 2) as i32;
@@ -105,23 +100,6 @@ fn main() {
                     y_offset = y;
 
                 }
-                /*
-                // Testing available MouseMotion attributes
-                Event::MouseMotion { timestamp, window_id, which, mousestate, x, y, xrel, yrel } => {
-                    //
-                    #[cfg(debug_assertions)]
-                    println!("\
-                        timestamp={timestamp:?}, \
-                        window_id={window_id:?}, \
-                        which={which:?}, \
-                        mousestate={mousestate:?}, \
-                        x={x:?}, \
-                        y={y:?}, \
-                        xrel={xrel:?}, \
-                        yrel={yrel:?}\
-                    ")
-                }
-                */
                 _ => {}
             }
         }
@@ -143,18 +121,11 @@ fn main() {
                 sim_cost,
                 x_offset,
                 y_offset,
-                &mut acc.0,
-                &mut acc.1,
-                &mut acc.2,
+                &mut acc,
             );
 
             elapsed += sim_cost;
         }
-
-        // Accumulators as f64 for R, G, B
-        let accfr = acc.0.as_secs_f64();
-        let accfg = acc.1.as_secs_f64();
-        let accfb = acc.2.as_secs_f64();
 
         // Adding mouse coords as offsets so our triangle is drawn at the cursor
         // Transposed to conform to filled_polygon() (and possibly others).
@@ -165,10 +136,13 @@ fn main() {
 
         /*
         #[cfg(debug_assertions)]
-        println!("color: ({r:?}, {g:?}, {b:?}), acc(r,g,b)=({0:?}, {1:?}, {2:?})",
-            acc.0,
-            acc.1,
-            acc.2,
+        println!("color: ({0:?}, {1:?}, {2:?}), acc(r,g,b)=({3:?}, {4:?}, {5:?})",
+            triangle.color.0,
+            triangle.color.1,
+            triangle.color.2,
+            (Triangle::CIRC_THIRDS.0 + acc.as_secs_f64()),
+            (Triangle::CIRC_THIRDS.1 + acc.as_secs_f64()),
+            (Triangle::CIRC_THIRDS.2 + acc.as_secs_f64()),
         );
         */
 

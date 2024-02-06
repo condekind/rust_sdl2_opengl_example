@@ -20,7 +20,7 @@ pub struct Triangle {
 
 impl Triangle {
 
-    const CIRC_THIRDS: (f64, f64, f64) = (
+    pub const CIRC_THIRDS: (f64, f64, f64) = (
         0.0 * THIRD_OF_CIRCUMFERENCE,
         1.0 * THIRD_OF_CIRCUMFERENCE,
         2.0 * THIRD_OF_CIRCUMFERENCE,
@@ -67,44 +67,38 @@ impl Triangle {
         sim_cost: Duration,
         x_offset: i32,
         y_offset: i32,
-        acc_r: &mut Duration,
-        acc_g: &mut Duration,
-        acc_b: &mut Duration,
+        acc: &mut Duration,
     ) {
         self.x_offset = x_offset;
         self.y_offset = y_offset;
 
         // Add frame duration to accumulators
-        *acc_r += sim_cost;
-        *acc_g += sim_cost;
-        *acc_b += sim_cost;
+        *acc += sim_cost;
 
         // Accumulators as f64 for R, G, B
-        let accfr = acc_r.as_secs_f64();
-        let accfg = acc_g.as_secs_f64();
-        let accfb = acc_b.as_secs_f64();
+        let accf = acc.as_secs_f64();
 
         // Colors values (RGB): each varying 0..1 (=255), separated by 2pi/3
         // due to the initial acc difference (when initialized)
         (self.color.0, self.color.1, self.color.2) = (
-            (accfr.cos() * 255.0) as u8,
-            (accfg.cos() * 255.0) as u8,
-            (accfb.cos() * 255.0) as u8,
+            ((Self::CIRC_THIRDS.0 + accf).cos() * 255.0) as u8,
+            ((Self::CIRC_THIRDS.1 + accf).cos() * 255.0) as u8,
+            ((Self::CIRC_THIRDS.2 + accf).cos() * 255.0) as u8,
         );
 
         // Adding mouse coords as offsets so our triangle is drawn at the cursor
         self.point = TrianglePoints(
             Point::new(
-                self.x_offset + ((accfr.cos() * 100.0) as i32),
-                self.y_offset + ((accfr.sin() * 100.0) as i32)
+                self.x_offset + (( (Self::CIRC_THIRDS.0 + accf).cos() * 100.0) as i32),
+                self.y_offset + (( (Self::CIRC_THIRDS.0 + accf).sin() * 100.0) as i32)
             ),
             Point::new(
-                self.x_offset + ((accfg.cos() * 100.0) as i32),
-                self.y_offset + ((accfg.sin() * 100.0) as i32)
+                self.x_offset + (( (Self::CIRC_THIRDS.1 + accf).cos() * 100.0) as i32),
+                self.y_offset + (( (Self::CIRC_THIRDS.1 + accf).sin() * 100.0) as i32)
             ),
             Point::new(
-                self.x_offset + ((accfb.cos() * 100.0) as i32),
-                self.y_offset + ((accfb.sin() * 100.0) as i32)
+                self.x_offset + (( (Self::CIRC_THIRDS.2 + accf).cos() * 100.0) as i32),
+                self.y_offset + (( (Self::CIRC_THIRDS.2 + accf).sin() * 100.0) as i32)
             ),
         );
 
